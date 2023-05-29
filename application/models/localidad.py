@@ -1,4 +1,4 @@
-from sqlalchemy import Numeric, create_engine, Column, Integer, String, ForeignKey
+from sqlalchemy import Boolean, Numeric, create_engine, Column, Integer, String, ForeignKey
 
 from main import Base
 
@@ -12,4 +12,4 @@ class Localidad(Base):
     provincia_id = Column(Integer, index=True)
     centroide_lat = Column(Numeric(precision=65, scale=30))
     centroide_lon = Column(Numeric(precision=65, scale=30))
-    borrado_logico = Column(bool)
+    borrado_logico = Column(Boolean)

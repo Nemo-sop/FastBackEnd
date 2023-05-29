@@ -1,5 +1,5 @@
 from MySQLdb import Binary
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
+from sqlalchemy import Boolean, create_engine, Column, Integer, String, ForeignKey
 
 from main import Base
 
@@ -12,4 +12,4 @@ class Usuario(Base):
     email = Column(String(60))
     contrasenia = Column(Binary(length=512))
     persona_id = Column(Integer, index=True)
-    borrado_logico = Column(bool)
+    borrado_logico = Column(Boolean)

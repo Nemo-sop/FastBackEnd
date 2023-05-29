@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
+from sqlalchemy import Boolean, create_engine, Column, Integer, String, ForeignKey
 
 from main import Base
 
@@ -13,4 +13,4 @@ class Productor(Base):
     cuit_cuil = Column(String(13))
     email = Column(String(60))
     referencia = Column(String(100))
-    borrado_logico = Column(bool)
+    borrado_logico = Column(Boolean)

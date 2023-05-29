@@ -1,5 +1,5 @@
 from MySQLdb import Binary
-from sqlalchemy import DATETIME, create_engine, Column, Integer, String, ForeignKey
+from sqlalchemy import DATETIME, Boolean, create_engine, Column, Integer, String, ForeignKey
 
 from main import Base
 
@@ -12,4 +12,4 @@ class Sesion(Base):
     fecha_hora_apertura = Column(DATETIME)
     fecha_hora_cierre = Column(DATETIME)
     usuario_id = Column(Integer, index=True)
-    borrado_logico = Column(bool)
+    borrado_logico = Column(Boolean)

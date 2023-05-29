@@ -1,5 +1,5 @@
     
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
+from sqlalchemy import Boolean, create_engine, Column, Integer, String, ForeignKey
 
 from main import Base
 
@@ -13,4 +13,4 @@ class Campo(Base):
     usuario_id = Column(Integer, index=True)
     localidad_id = Column(Integer, index=True)
     productor_id = Column(Integer, index=True)
-    borrado_logico = Column(bool)
+    borrado_logico = Column(Boolean)
