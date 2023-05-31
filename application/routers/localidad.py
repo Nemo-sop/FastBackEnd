@@ -1,3 +1,4 @@
+from models.provincia import *
 from main import app, SessionLocal
 from models.localidad import *
 
@@ -20,4 +21,4 @@ async def obtener_localidades(provincia_id: int):
 
     localidades = db.query(Localidad).filter(Localidad.provincia_id == provincia_id).all()
 
-    return {"localidades": [localidad for localidad in localidades]}
+    return [localidad for localidad in localidades]
