@@ -11,7 +11,7 @@ app = FastAPI()
 Base, SessionLocal = startConection()
 
 # Definir las rutas
-from routers.localidad import *
+#from routers.localidad import *
 from security.configuracion_jwt import *
 
 @app.get("/")
