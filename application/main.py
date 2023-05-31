@@ -12,6 +12,12 @@ Base, SessionLocal = startConection()
 
 # Definir las rutas
 from routers.localidad import *
+from security.configuracion_jwt import *
+
+@app.get("/")
+def home_page():
+    return {"up and running"}
+
 
 # Run the application with uvicorn
 if __name__ == "__main__":
