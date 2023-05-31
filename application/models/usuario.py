@@ -12,13 +12,14 @@ class Usuario(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(60))
-    contrasenia = Column(LargeBinary)
+    contrasenia = Column(String(100))
     persona_id = Column(Integer, index=True)
     borrado_logico = Column(Boolean)
 
 """
 class Usuario(BaseModel):
-    username: str
-    email: Union[str, None] = None
-    full_name: Union[str, None] = None
+    id: str
+    email: str
+    contrasenia: str
+    persona_id: Union[int, None] = None
     disabled: Union[bool, None] = None"""

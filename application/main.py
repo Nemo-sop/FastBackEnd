@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from database.connection import startConection
-#from models.provincia import *
 from sqlalchemy.orm import Session
+
+
 
 
 # Create the FastAPI app
