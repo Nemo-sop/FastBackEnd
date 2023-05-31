@@ -14,7 +14,7 @@ http://127.0.0.1:8000/api/campoConsulta/<int>/
 Devuelve todos los datos sobre el campo que tenga un pk=<int> en formato JSON
 """
 
-from application.models.campo import Campo
+from models.campo import *
 from main import app, SessionLocal
 from models.localidad import *
 
@@ -27,7 +27,7 @@ async def obtener_campos(usuario_id: int):
 
     campos = db.query(Campo).filter(Campo.usuario_id == usuario_id).all()
 
-    return {"campos": [campo for campo in campos]}
+    return [campo for campo in campos]
 
 # ruta para obtener un listado de todas las localidades en la bd de una provincia
 @app.get("/campos/{usuario_id}/{campo_id}", tags=["campo"])
@@ -36,4 +36,4 @@ async def obtener_campo(usuario_id: int, campo_id: int):
 
     campos = db.query(Campo).filter(Campo.usuario_id == usuario_id).filter(Campo.id == campo_id).first()
 
-    return {"campos": [campo for campo in campos]}
+    return [campo for campo in campos]

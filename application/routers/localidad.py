@@ -12,7 +12,7 @@ async def obtener_localidades():
 
     localidades = db.query(Localidad).all()
 
-    return {"localidades": [localidad for localidad in localidades]}
+    return [localidad for localidad in localidades]
 
 # ruta para obtener un listado de todas las localidades en la bd de una provincia
 @app.get("/provincias/{provincia_id}/localidades", tags=["localidad"])

@@ -11,4 +11,4 @@ async def obtener_productores():
 
     productores = db.query(Productor).all()
 
-    return {"productores": [productor for productor in productores]}
+    return [productor for productor in productores]

@@ -11,4 +11,4 @@ async def obtener_provincias():
 
     provincias = db.query(Provincia).all()
 
-    return {"provincias": [provincia for provincia in provincias]}
+    return [provincia for provincia in provincias]
