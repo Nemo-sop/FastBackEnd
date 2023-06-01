@@ -68,7 +68,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-@app.post("/token")
+@app.post("/token", tags=['Usuarios'])
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     user = authenticate_user(form_data.username, form_data.password)
     if not user:
@@ -81,7 +81,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 
-@app.get("/protected_route")
+@app.get("/protected_route", tags=['Usuarios'])
 async def protected_route(token: str = Depends(oauth2_scheme)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
