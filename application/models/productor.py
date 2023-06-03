@@ -13,4 +13,5 @@ class Productor(Base):
     cuit_cuil = Column(String(13))
     email = Column(String(60))
     referencia = Column(String(100))
+    usuario_id = Column(Integer, index=True)
     borrado_logico = Column(Boolean)

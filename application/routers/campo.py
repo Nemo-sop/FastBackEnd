@@ -21,7 +21,8 @@ from schemas.campo import *
 from fastapi import HTTPException, Depends, Request
 from models.usuario import *
 from sqlalchemy.orm import load_only
-from security.configuracion_jwt import validar_token
+
+
 # Routes
 
 
@@ -29,9 +30,8 @@ from security.configuracion_jwt import validar_token
 
 
 @app.get("/campos/{usuario_id}", tags=["campo"])
-async def obtener_campos(token: str = Depends(validar_token)):
-    usuario_id = token.get("sub")
-
+async def obtener_campos():
+    
     db = SessionLocal()
 
     campos = (db.query(Campo).filter(Campo.borrado_logico == False).options(load_only(
