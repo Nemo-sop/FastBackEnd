@@ -67,3 +67,45 @@ async def alta_campo(usuario_id: int, campo: CampoBase):
 
      return nuevo_campo
      
+# ...
+
+# ruta de actualización de campo
+@app.put("/campoModificar/{usuario_id}/{campo_id}", tags=["campo"])
+async def actualizar_campo(campo_id: int, campo: CampoBase):
+    db = SessionLocal()
+
+    # Verificar si el campo existe
+    campo_existente = db.query(Campo).filter(Campo.id == campo_id).first()
+    if not campo_existente:
+        raise HTTPException(status_code=404, detail="Campo no encontrado")
+
+    # Actualizar los atributos del campo existente
+    campo_existente.nombre = campo.nombre
+    campo_existente.localidad_id = campo.localidad_id
+    campo_existente.productor_id = campo.productor_id
+
+    # Guardar los cambios en la base de datos
+    db.commit()
+    db.refresh(campo_existente)
+
+    return campo_existente
+
+
+# ruta de eliminación de campo
+@app.delete("/campoBaja/{usuario_id}/{campo_id}", tags=["campo"])
+async def eliminar_campo(campo_id: int):
+    db = SessionLocal()
+
+    # Verificar si el campo existe
+    campo_existente = db.query(Campo).filter(Campo.id == campo_id).first()
+    if not campo_existente:
+        raise HTTPException(status_code=404, detail="Campo no encontrado")
+
+    # Borrado lógico del campo
+    campo_existente.borrado_logico = True
+
+    # Guardar los cambios en la base de datos
+    db.commit()
+
+    return {"message": "Campo eliminado correctamente"}
+    
