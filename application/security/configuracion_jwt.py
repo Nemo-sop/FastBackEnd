@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -93,3 +93,29 @@ async def protected_route(token: str = Depends(oauth2_scheme)):
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid authentication token")
 
+@app.middleware("http")
+async def validar_token(request: Request, call_next):
+    if request.url.path == "/docs":
+        return await call_next(request)
+
+    authorization_header = request.headers.get("Authorization")
+    if not authorization_header or not authorization_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Token de autenticación requerido")
+
+    token = authorization_header.split("Bearer ")[1]
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        request.state.token_payload = payload
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Token inválido")
+
+    return await call_next(request)
+
+
+def verificar_token(token: str):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        # Aquí puedes realizar la validación adicional que necesites
+        return payload
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Token inválido")
