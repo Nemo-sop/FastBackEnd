@@ -31,4 +31,6 @@ async def protected_obtener_productores(token: str = Depends(oauth2_scheme)):
     
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid authentication token")
+    
+
 
