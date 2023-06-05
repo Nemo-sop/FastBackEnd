@@ -89,72 +89,123 @@ async def protected_obtener_campo(campo_id: int, token: str = Depends(oauth2_sch
 # ruta de alta de campo
 
 
-@app.post("/campoAlta/{usuario_id}", tags=["campo"])
-async def alta_campo(usuario_id: int, campo: CampoBase):
+@app.post("/campoAlta", tags=["campo"])
+async def protected_alta_campo(campo: CampoBase, token: str = Depends(oauth2_scheme)):
     print(campo)
-    db = SessionLocal()
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        mail = payload.get("sub")
+        if mail is None:
+            raise HTTPException(status_code=401, detail="Invalid authentication token")
 
-    # Verificar si el usuario existe
-    usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
-    if not usuario:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        # Implementa la lógica adicional para verificar y autorizar al usuario
+        db = SessionLocal()
 
-    # Crear una instancia de la clase Campo
-    nuevo_campo = Campo(
-        nombre=campo.nombre,
-        # usuario_id=usuario_id,
-        localidad_id=campo.localidad_id,
-        productor_id=campo.productor_id,
-        borrado_logico=False
-    )
+        # Obtener usuario a partir del mail
+        usuario = db.query(Usuario).filter(Usuario.email == mail).first()
+        if not usuario:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-    # Guardar el nuevo campo en la base de datos
-    db.add(nuevo_campo)
-    db.commit()
-    db.refresh(nuevo_campo)
+        # Crear una instancia de la clase Campo
+        nuevo_campo = Campo(
+            nombre=campo.nombre,
+            localidad_id=campo.localidad_id,
+            productor_id=campo.productor_id,
+            borrado_logico=False
+        )
 
-    return nuevo_campo
+        # Guardar el nuevo campo en la base de datos
+        db.add(nuevo_campo)
+        db.commit()
+        db.refresh(nuevo_campo)
+
+        return nuevo_campo
+    
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid authentication token")
+
 
 # ...
 
 # ruta de actualización de campo
 
 
-@app.put("/campoModificar/{usuario_id}/{campo_id}", tags=["campo"])
-async def actualizar_campo(campo_id: int, campo: CampoBase):
-    db = SessionLocal()
+@app.put("/campoModificar/{campo_id}", tags=["campo"])
+async def actualizar_campo(campo_id: int, campo: CampoBase, token: str = Depends(oauth2_scheme)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        mail = payload.get("sub")
+        if mail is None:
+            raise HTTPException(status_code=401, detail="Invalid authentication token")
 
-    # Verificar si el campo existe
-    campo_existente = db.query(Campo).filter(Campo.id == campo_id).first()
-    if not campo_existente:
-        raise HTTPException(status_code=404, detail="Campo no encontrado")
+        # Implementa la lógica adicional para verificar y autorizar al usuario
+        db = SessionLocal()
+        
+        # Obtener usuario a partir del mail
+        usuario = db.query(Usuario).filter(Usuario.email == mail).first()
+        if not usuario:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-    # Actualizar los atributos del campo existente
-    campo_existente.nombre = campo.nombre
-    campo_existente.localidad_id = campo.localidad_id
-    campo_existente.productor_id = campo.productor_id
+        # Verificar si el campo existe
+        campo_existente = db.query(Campo).filter(Campo.id == campo_id).first()
+        if not campo_existente:
+            raise HTTPException(status_code=404, detail="Campo no encontrado")
+        
+        # Verificar si el usuario está asociado al productor del campo
+        productor = db.query(Productor).filter(Productor.id == campo_existente.productor_id).first()
+        if not productor or productor.usuario_id != usuario.id:
+            raise HTTPException(status_code=403, detail="No tienes permisos para modificar este campo")
 
-    # Guardar los cambios en la base de datos
-    db.commit()
-    db.refresh(campo_existente)
+        # Actualizar los atributos del campo existente
+        campo_existente.nombre = campo.nombre
+        campo_existente.localidad_id = campo.localidad_id
+        campo_existente.productor_id = campo.productor_id
 
-    return campo_existente
+        # Guardar los cambios en la base de datos
+        db.commit()
+        db.refresh(campo_existente)
+
+        return campo_existente
+
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid authentication token")
 
 
 # ruta de eliminación de campo
-@app.delete("/campoBaja/{usuario_id}/{campo_id}", tags=["campo"])
-async def eliminar_campo(campo_id: int):
-    db = SessionLocal()
+@app.delete("/campoBaja/{campo_id}", tags=["campo"])
+async def eliminar_campo(campo_id: int, token: str = Depends(oauth2_scheme)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        mail = payload.get("sub")
+        if mail is None:
+            raise HTTPException(status_code=401, detail="Invalid authentication token")
+        
+        # Implementa la lógica adicional para verificar y autorizar al usuario
+        db = SessionLocal()
 
-    # Verificar si el campo existe
-    campo_existente = db.query(Campo).filter(Campo.id == campo_id).first()
-    if not campo_existente:
-        raise HTTPException(status_code=404, detail="Campo no encontrado")
+        # Obtener usuario a partir del mail
+        usuario = db.query(Usuario).filter(Usuario.email == mail).first()
+        if not usuario:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-    # Borrado lógico del campo
-    campo_existente.borrado_logico = True
+        # Verificar si el campo existe
+        campo_existente = db.query(Campo).filter(Campo.id == campo_id).first()
+        if not campo_existente:
+            raise HTTPException(status_code=404, detail="Campo no encontrado")
+        
+        # Verificar si el usuario está asociado al productor del campo
+        productor = db.query(Productor).filter(Productor.id == campo_existente.productor_id).first()
+        if not productor or productor.usuario_id != usuario.id:
+            raise HTTPException(status_code=403, detail="No tienes permisos para eliminar este campo")
 
-    # Guardar los cambios en la base de datos
-    db.commit()
+        # Borrado lógico del campo
+        campo_existente.borrado_logico = True
 
-    return {"message": "Campo eliminado correctamente"}
+        # Guardar los cambios en la base de datos
+        db.commit()
+
+        return {"message": "Campo eliminado correctamente"}
+    
+    except JWTError:
+        raise HTTPException
+
