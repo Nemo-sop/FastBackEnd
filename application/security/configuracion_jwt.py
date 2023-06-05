@@ -68,12 +68,13 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-class LoginData(BaseModel):
-    username: str
-    password: str
+class LoginData():
+    username:str
+    password:str
 
 @app.post("/token", tags=['Usuarios'])
 async def login_for_access_token(form_data: LoginData):
+#async def login_for_access_token(form_data:OAuth2PasswordRequestForm = Depends()):
     user = authenticate_user(form_data.username, form_data.password)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid username or password")
