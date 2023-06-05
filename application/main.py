@@ -1,12 +1,25 @@
 from fastapi import FastAPI
 from database.connection import startConection
 from sqlalchemy.orm import Session
+from fastapi.middleware.cors import CORSMiddleware
 
 
 
 
 # Create the FastAPI app
 app = FastAPI()
+
+origins = [
+    "http://localhost:5173",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"], 
+)
 
 # Conexion a la base de datos
 Base, SessionLocal = startConection()

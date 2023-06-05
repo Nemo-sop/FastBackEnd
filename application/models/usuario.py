@@ -1,4 +1,4 @@
-from typing import Annotated, Union
+# from typing import Annotated, Union
 from MySQLdb import Binary
 from pydantic import BaseModel
 from sqlalchemy import Boolean, LargeBinary, create_engine, Column, Integer, String, ForeignKey
