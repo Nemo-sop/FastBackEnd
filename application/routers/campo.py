@@ -21,35 +21,70 @@ from schemas.campo import *
 from fastapi import HTTPException, Depends, Request
 from models.usuario import *
 from sqlalchemy.orm import load_only
-
-
+from security.configuracion_jwt import oauth2_scheme, SECRET_KEY, ALGORITHM
+from jose import JWTError, jwt
+from models.productor import *
 # Routes
 
 
 # ruta para obtener un listado de todas los campos en la bd de un usuario
 
 
-@app.get("/campos/{usuario_id}", tags=["campo"])
-async def obtener_campos():
-    
-    db = SessionLocal()
+@app.get("/campos", tags=["campo"])
+async def protected_obtener_campos(token: str = Depends(oauth2_scheme)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        mail = payload.get("sub")
+        if mail is None:
+            raise HTTPException(
+                status_code=401, detail="Invalid authentication token")
+        # Implementa la lógica adicional para verificar y autorizar al usuario
+        db = SessionLocal()
 
-    campos = (db.query(Campo).filter(Campo.borrado_logico == False).options(load_only(
-        Campo.id, Campo.nombre, Campo.localidad_id, Campo.productor_id)).all())
+        # Obtener usuario a partir del mail
+        usuario = db.query(Usuario).filter(Usuario.email == mail).first()
 
-    return [campo for campo in campos]
+        # Obtener todos los campos que tenga productores asociados a id del usuario
+        campos = (db.query(Campo).filter(Campo.borrado_logico == False, Campo.productor_id.in_(
+            db.query(Productor.id).filter(Productor.usuario_id == usuario.id)
+        ),
+        ).options(load_only(
+            Campo.id, Campo.nombre, Campo.localidad_id, Campo.productor_id)).all())
+
+        return [campo for campo in campos]
+
+    except JWTError:
+        raise HTTPException(
+            status_code=401, detail="Invalid authentication token")
+
 
 # ruta para obtener un campo de un usuario
 
+@app.get("/campo/{campo_id}", tags=["campo"])
+async def protected_obtener_campo(campo_id: int, token: str = Depends(oauth2_scheme)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        mail = payload.get("sub")
+        if mail is None:
+            raise HTTPException(
+                status_code=401, detail="Invalid authentication token")
+        # Implementa la lógica adicional para verificar y autorizar al usuario
+        db = SessionLocal()
 
-@app.get("/campo/{usuario_id}/{campo_id}", tags=["campo"])
-async def obtener_campo(usuario_id: int, campo_id: int):
-    db = SessionLocal()
+        # Obtener usuario a partir del mail
+        usuario = db.query(Usuario).filter(Usuario.email == mail).first()
 
-    campos = (db.query(Campo).filter(Campo.borrado_logico == False).options(
+        # Obtener el campo deseado
+        campo = (db.query(Campo).filter(Campo.borrado_logico == False, Campo.productor_id.in_(
+            db.query(Productor.id).filter(Productor.usuario_id == usuario.id)
+        ),).options(
         load_only(Campo.id, Campo.nombre, Campo.localidad_id, Campo.productor_id)).filter(Campo.id == campo_id).first())
 
-    return [campo for campo in campos]
+        return campo
+    
+    except JWTError:
+        raise HTTPException(
+            status_code=401, detail="Invalid authentication token")
 
 # ruta de alta de campo
 
